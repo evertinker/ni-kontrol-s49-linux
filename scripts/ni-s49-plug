@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""Restart S49 browse when the keyboard is plugged in.
+
+udev reports one add event for the device. A burst of interface events is
+ignored. Unplug needs nothing: the next plug runs the same recovery as
+systemctl --user restart ni-s49-usb.service ni-s49-hcs.service.
+"""
+import subprocess
+import sys
+import time
+
+DEBOUNCE_S = 4.0
+
+
+def is_plug(block):
+    return (
+        block.get("ACTION") == "add"
+        and block.get("DEVTYPE") == "usb_device"
+        and block.get("ID_VENDOR_ID", "").lower() == "17cc"
+        and block.get("ID_MODEL_ID", "").lower() == "2100"
+    )
+
+
+def log(msg):
+    print(time.strftime("%Y-%m-%d %H:%M:%S ") + msg, flush=True)
+
+
+def restart():
+    log("keyboard plugged in, restarting browse")
+    subprocess.run(
+        ["systemctl", "--user", "restart", "ni-s49-usb.service", "ni-s49-hcs.service"],
+        check=False,
+    )
+
+
+def self_test():
+    assert is_plug({
+        "ACTION": "add",
+        "DEVTYPE": "usb_device",
+        "ID_VENDOR_ID": "17cc",
+        "ID_MODEL_ID": "2100",
+    })
+    assert not is_plug({
+        "ACTION": "add",
+        "DEVTYPE": "usb_interface",
+        "ID_VENDOR_ID": "17cc",
+        "ID_MODEL_ID": "2100",
+    })
+    assert not is_plug({
+        "ACTION": "remove",
+        "DEVTYPE": "usb_device",
+        "ID_VENDOR_ID": "17cc",
+        "ID_MODEL_ID": "2100",
+    })
+    assert not is_plug({
+        "ACTION": "add",
+        "DEVTYPE": "usb_device",
+        "ID_VENDOR_ID": "17cc",
+        "ID_MODEL_ID": "1915",
+    })
+
+
+def watch():
+    proc = subprocess.Popen(
+        ["udevadm", "monitor", "--udev", "--property", "--subsystem-match=usb"],
+        stdout=subprocess.PIPE,
+        text=True,
+        bufsize=1,
+    )
+    log("watching for Kontrol S49 MK3")
+    block = {}
+    last = 0.0
+    assert proc.stdout is not None
+    for raw in proc.stdout:
+        line = raw.strip()
+        if line:
+            if "=" in line and not line.startswith("UDEV ") and not line.startswith("KERNEL "):
+                key, value = line.split("=", 1)
+                block[key] = value
+            continue
+        if is_plug(block):
+            now = time.monotonic()
+            if now - last >= DEBOUNCE_S:
+                last = now
+                restart()
+            else:
+                log("ignored extra plug event")
+        block = {}
+    return proc.wait()
+
+
+if __name__ == "__main__":
+    if "--self-test" in sys.argv:
+        self_test()
+        print("ok")
+    else:
+        raise SystemExit(watch())

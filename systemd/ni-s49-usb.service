@@ -1,0 +1,11 @@
+[Unit]
+Description=Kontrol S49 MK3 browse USB helper
+After=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/ni-s49-usb
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target

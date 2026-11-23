@@ -1,0 +1,17 @@
+[Unit]
+Description=NI Hardware Connection Service for Kontrol S49 browse
+After=graphical-session.target ni-s49-usb.service
+Wants=ni-s49-usb.service
+
+[Service]
+Environment=NI_WINE_PREFIX=%h/.wine-ni
+Environment=NI_WINE=%h/.local/bin/wine
+Environment=NI_S49_IFACE=%h/.local/lib/ni-s49/s49-iface.exe
+Environment=NI_AGENT_DIR=%h/.wine-ni/drive_c/users/Public/Documents/Native Instruments
+ExecStart=%h/.local/bin/ni-s49-hcs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,11 @@
+LIBRARY WINUSB
+EXPORTS
+    WinUsb_AbortPipe
+    WinUsb_Free
+    WinUsb_GetDescriptor
+    WinUsb_Initialize
+    WinUsb_QueryInterfaceSettings
+    WinUsb_QueryPipe
+    WinUsb_ReadPipe
+    WinUsb_SetPipePolicy
+    WinUsb_WritePipe

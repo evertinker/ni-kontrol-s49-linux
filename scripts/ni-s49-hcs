@@ -1,0 +1,50 @@
+#!/bin/sh
+# Publish the S49 device interface, then run NIHardwareConnectionService
+# in the Native Instruments Wine prefix.
+# Ableton reaches that service through ni-nks-bridge.
+WINEPREFIX="${NI_WINE_PREFIX:-$HOME/.wine-ni}"
+export WINEPREFIX
+export WINEDEBUG=-all
+WINE="${NI_WINE:-$HOME/.local/bin/wine}"
+IFACE_UNIX="${NI_S49_IFACE:-$HOME/.local/lib/ni-s49/s49-iface.exe}"
+AGENT_DIR="${NI_AGENT_DIR:-$WINEPREFIX/drive_c/users/Public/Documents/Native Instruments}"
+
+S49_USB=""
+for d in /sys/bus/usb/devices/*; do
+    [ "$(cat "$d/idVendor" 2>/dev/null)" = "17cc" ] || continue
+    [ "$(cat "$d/idProduct" 2>/dev/null)" = "2100" ] || continue
+    S49_USB="${d##*/}"
+    break
+done
+export S49_USB
+echo "S49_USB=${S49_USB:-none}"
+
+iface_win=$(printf '%s' "$IFACE_UNIX" | sed 's#/#\\#g; s#^#Z:#')
+i=0
+while [ "$i" -lt 30 ]; do
+    if ss -ltn | grep -q '127.0.0.1:47653'; then
+        break
+    fi
+    i=$((i + 1))
+    sleep 1
+done
+ok=0
+i=0
+while [ "$i" -lt 15 ]; do
+    if "$WINE" "$iface_win" >/tmp/ni-s49-iface.log 2>&1; then
+        ok=1
+        break
+    fi
+    i=$((i + 1))
+    sleep 2
+done
+if [ "$ok" -ne 1 ]; then
+    echo "s49-iface did not publish the keyboard" >&2
+    exit 1
+fi
+if ! ss -xl | grep -q 'odr_agent\.kks'; then
+    rm -f "$AGENT_DIR/com.native-instruments.nks-connect" \
+        "$AGENT_DIR/com.native-instruments.odr_agent.kks" \
+        "$AGENT_DIR/com.native-instruments.odr_agent.kks.lock"
+fi
+exec "$WINE" "C:\\Program Files\\Common Files\\Native Instruments\\Hardware\\Hardware Connection Service\\NIHardwareConnectionService.exe"

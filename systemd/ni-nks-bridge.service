@@ -1,0 +1,14 @@
+[Unit]
+Description=NKS socket bridge for Wine Ableton
+After=graphical-session.target
+
+[Service]
+# Directory that contains com.native-instruments.odr_agent.kks.
+# Override this if the NI prefix does not live in ~/.wine-ni.
+Environment=NI_AGENT_DIR=%h/.wine-ni/drive_c/users/Public/Documents/Native Instruments
+ExecStart=%h/.local/bin/ni-nks-bridge
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target

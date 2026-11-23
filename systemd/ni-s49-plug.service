@@ -1,0 +1,11 @@
+[Unit]
+Description=Recover Kontrol S49 browse when the keyboard is plugged in
+After=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/ni-s49-plug
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target

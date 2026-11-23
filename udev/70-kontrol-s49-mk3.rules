@@ -1,0 +1,7 @@
+# Kontrol S49 MK3 (USB 17cc:2100) is not in systemd's production-controller list.
+# The same tag other NI controllers get lets 70-uaccess.rules grant the
+# logged-in user the device nodes.
+# hidraw is the HID interface. The usb device node is the bulk interface
+# (interface 3) that NIHardwareConnectionService uses for the browser.
+SUBSYSTEM=="hidraw", KERNELS=="0003:17CC:2100.*", ENV{ID_AV_PRODUCTION_CONTROLLER}="1"
+SUBSYSTEM=="usb", ATTR{idVendor}=="17cc", ATTR{idProduct}=="2100", ENV{ID_AV_PRODUCTION_CONTROLLER}="1"
