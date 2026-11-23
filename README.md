@@ -1,12 +1,28 @@
-# Kontrol S49 MK3 browse on Linux
+# Kontrol S49 MK3 instrument browsing on Linux
 
-Unofficial helper for Native Instruments Kontrol S49 MK3 instrument browse on Linux (tested on CachyOS). It is not affiliated with Native Instruments or Ableton.
+Make the **Native Instruments Kontrol S49 MK3's built-in instrument browser** work with Kontakt 8 on Linux—both standalone and inside Ableton Live 12 running through [shibco/ableton-linux](https://github.com/shibco/ableton-linux).
 
-Tested with Kontakt 8 in its own Wine prefix, and with Kontakt inside [shibco/ableton-linux](https://github.com/shibco/ableton-linux) (Wine 11.13). The Ableton control-surface profile is separate and only needs the DAW MIDI port. Browse is a USB connection plus an agent socket, not MIDI.
+## The problem
 
-This is not a yabridge patch. Loading the same plugins through yabridge is a different problem.
+The S49 MK3 can send MIDI notes to Linux applications, and its DAW-control MIDI port can operate Ableton's transport and mixer. But **MIDI working does not mean the keyboard's instrument browser works**.
 
-## What is going on
+Browsing and selecting Kontakt instruments from the keyboard's own screen requires a separate connection to Native Instruments' **Hardware Connection Service**. On Windows, the NI software can discover the keyboard and communicate with it through a dedicated USB interface. Under Wine, parts of that Windows USB access and device-discovery path are missing. So Kontakt itself may run and play normally while the keyboard's browser cannot connect.
+
+Running Kontakt inside Wine-based Ableton introduces another obstacle: Ableton uses a **different Wine prefix** from the NI installation, and the customized Wine build used by shibco's project cannot open the Unix-domain sockets needed to reach the NI hardware service. Without an additional bridge, the instrument browser still cannot talk to Kontakt inside Live.
+
+In short: **the keys can work, the plugin can work, and DAW transport can work—while hardware instrument browsing remains broken.** This project connects those missing pieces.
+
+## What this project provides
+
+- **Keyboard USB access:** A Linux USB helper and replacement Windows components let the NI Hardware Connection Service discover and communicate with the S49 MK3.
+- **Standalone Kontakt support:** Restores the service connection for Kontakt 8 running in the Native Instruments Wine prefix.
+- **Wine-based Ableton support:** A local socket bridge and DLL hook connect Kontakt running in Ableton's separate Wine prefix to the NI hardware service.
+
+The hardware-browser connection is **separate from ordinary MIDI and Ableton control-surface setup**. This project does not replace the Komplete Kontrol S Mk3 DAW-control profile.
+
+**Tested environment:** CachyOS, Kontrol S49 MK3, Kontakt 8 standalone, and Kontakt inside [shibco/ableton-linux](https://github.com/shibco/ableton-linux) (Wine 11.13). This is an unofficial community project, not affiliated with Native Instruments or Ableton. It is **not a yabridge patch**; hosting NI plugins in native Linux DAWs through yabridge is a separate setup.
+
+## How it works
 
 The keyboard's instrument browser talks to `NIHardwareConnectionService.exe` over a USB bulk interface (interface 3 on USB `17cc:2100`). Kontakt then talks to that service over a Unix socket inside the Wine prefix.
 
