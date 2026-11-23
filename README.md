@@ -2,6 +2,8 @@
 
 Make the **Native Instruments Kontrol S49 MK3's built-in instrument browser** work with Kontakt 8 on Linux—both standalone and inside Ableton Live 12 running through [shibco/ableton-linux](https://github.com/shibco/ableton-linux).
 
+**This project extends [NI-Wine](https://github.com/selimbucher/native-instruments).** NI-Wine installs and runs Native Access, Kontakt 8, and other Native Instruments software in a Wine environment. This repository addresses the additional USB device-discovery and socket-communication issues that prevent the S49 MK3's hardware instrument browser from working with that software, including Kontakt hosted inside Wine-based Ableton Live.
+
 ## The problem
 
 The S49 MK3 can send MIDI notes to Linux applications, and its DAW-control MIDI port can operate Ableton's transport and mixer. But **MIDI working does not mean the keyboard's instrument browser works**.
@@ -36,7 +38,9 @@ The Wine build used by ableton-linux cannot open `AF_UNIX` sockets at all. `ni-n
 
 ## Build
 
-Dependencies: `gcc`, `libusb-1.0`, `x86_64-w64-mingw32-gcc`.
+**Prerequisite:** Set up [NI-Wine](https://github.com/selimbucher/native-instruments) first, including Native Access and Kontakt 8. This project does not install Native Instruments software or replace NI-Wine.
+
+Build dependencies: `gcc`, `libusb-1.0`, `x86_64-w64-mingw32-gcc`.
 
 ```sh
 make
@@ -47,7 +51,7 @@ make install
 
 ## Native Instruments prefix
 
-Use the prefix where Native Access and Kontakt are installed. The examples below use `~/.wine-ni`. Point `NI_WINE_PREFIX` at yours if it lives somewhere else. Use that prefix's `wine`, not the Ableton wine.
+Use the **NI-Wine prefix** where Native Access and Kontakt are installed. NI-Wine's default is `~/.wine-ni`; if you configured a custom location (for example through `NI_WINE_PREFIX`), use that instead. The commands below use `NI_WINE_PREFIX` when set, otherwise `~/.wine-ni`. Use the Wine executable for your NI-Wine setup, **not** the Ableton Wine runtime.
 
 Back up the two files before replacing them:
 
