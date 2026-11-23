@@ -1,6 +1,6 @@
 # Kontrol S49 MK3 browse on Linux
 
-Unofficial helper for Native Instruments Kontrol S49 MK3 instrument browse on Linux. It is not affiliated with Native Instruments or Ableton.
+Unofficial helper for Native Instruments Kontrol S49 MK3 instrument browse on Linux (tested on CachyOS). It is not affiliated with Native Instruments or Ableton.
 
 Tested with Kontakt 8 in its own Wine prefix, and with Kontakt inside [shibco/ableton-linux](https://github.com/shibco/ableton-linux) (Wine 11.13). The Ableton control-surface profile is separate and only needs the DAW MIDI port. Browse is a USB connection plus an agent socket, not MIDI.
 
