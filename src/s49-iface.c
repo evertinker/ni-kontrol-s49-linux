@@ -26,7 +26,10 @@ static void publish_guid(const WCHAR *inst, const WCHAR *guid)
             guid, inst, guid);
     swprintf(hash_key, ARRAYSIZE(hash_key), L"%s\\#", class_key);
     swprintf(ctrl_key, ARRAYSIZE(ctrl_key), L"%s\\Control", hash_key);
-    swprintf(dosname, ARRAYSIZE(dosname), L"USB#VID_17CC&PID_2100&MI_03#%s#%s", inst, usb_guid);
+    /* This has to be the guid being published. The generic USB guid leaves
+     * the NI path with no DOS device, so CreateFile returns error 2 and the
+     * hardware service reports that the bulk pipes could not be connected. */
+    swprintf(dosname, ARRAYSIZE(dosname), L"USB#VID_17CC&PID_2100&MI_03#%s#%s", inst, guid);
 
     HKEY key;
     DWORD linked = 1;

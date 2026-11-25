@@ -141,3 +141,5 @@ Plug the keyboard in, wait a few seconds, then start Kontakt or Ableton. A saved
 | `ni-s49-plug.service` | restart browse after a replug |
 
 Logs: `/tmp/ni-s49-usb.log`, `/tmp/ni-s49-iface.log`, `/tmp/ni-nks-bridge.log`, and `NIHardwareConnectionService.log` in the prefix temp directory. A good hardware-service log ends with `device connected: Kontrol S49 MK3`.
+
+If the Ableton template loads but the plugin page says no parameters are mapped, check those two logs. `CreateFile` on `{9CB5BE68-52CA-4F04-A394-090391A15E51}` must succeed. Error 2 there means the DOS device was created for the generic USB guid instead, and the hardware log says the bulk pipes could not be connected. Restarting the keyboard or Live runs that same publisher again. Rebuild, `make install`, and restart `ni-s49-hcs.service`.
